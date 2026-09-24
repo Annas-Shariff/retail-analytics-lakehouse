@@ -1,6 +1,6 @@
 from airflow.decorators import dag
 from airflow.providers.databricks.operators.databricks import DatabricksRunNowOperator
-from pendulum import datetime
+from pendulum import datetime, duration
 
 
 @dag(
@@ -8,6 +8,7 @@ from pendulum import datetime
     schedule="0 18 * * *",
     start_date=datetime(2026, 7, 25, tz="Asia/Kolkata"),
     catchup=False,
+    default_args={"retries": 2, "retry_delay": duration(minutes=5)},
     tags=["retail-lakehouse"],
 )
 def retail_lakehouse_daily():
