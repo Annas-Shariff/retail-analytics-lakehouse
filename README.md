@@ -48,7 +48,9 @@ Each simulated day is a full snapshot: `orders.csv` contains only that day's new
 
 ## Orchestration
 
-The three pipeline notebooks are wired into a **Databricks Job** with explicit task dependencies (`bronze → silver → gold`) and Job-level parameters (`day_folder`, `business_date`) that push down into each notebook's widgets — the same parameterization an Airflow DAG will call into next.
+The three pipeline notebooks are wired into a **Databricks Job** with explicit task dependencies (`bronze → silver → gold`) and Job-level parameters (`day_folder`, `business_date`) that push down into each notebook's widgets.
+
+On top of that, an **Airflow DAG** (`retail_lakehouse_daily`, Astro-managed, in `airflow/dags/`) triggers the Databricks Job on a daily schedule via `DatabricksRunNowOperator`, passing Airflow's logical date (`{{ ds }}`) down as `business_date` — so any day can be re-run and still produce that day's result. Airflow is the scheduler; Databricks remains the executor, with the `bronze → silver → gold` dependency graph living in the Job.
 
 ## Repository structure
 
@@ -68,6 +70,6 @@ generator/generate_data.py   simulated source system — generates daily CSV bat
 
 ## Roadmap
 
-- [ ] Airflow orchestration (calling the same Databricks Job on a schedule)
+- [x] Airflow orchestration (calling the same Databricks Job on a schedule)
 - [ ] BI dashboard on the Gold layer
 - [ ] Spark Structured Streaming variant
